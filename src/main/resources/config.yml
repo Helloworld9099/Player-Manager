@@ -1,0 +1,22 @@
+# Periodic offline inventory snapshot (5 minutes by default).
+snapshot-interval-ticks: 6000
+# Historical inventory backups are independent of the single most recent death record.
+# Retention applies separately per player and backup type; values below 1 become 1.
+backups:
+  keep-manual: 10
+  keep-safety: 20
+# Legacy 1.1 backups are preserved and never automatically pruned.
+# Unresolved pre-restore safety backups are always preserved until a result marker is written.
+
+
+# Vanish is for session-scoped admin moderation, not full packet-level stealth.
+# Vanished OPs are hidden from normal players and from their tab lists.
+# Other OPs and players with playerinspector.vanish.see can see them.
+vanish:
+  fake-messages: true
+  leave-message: "&e{player} left the game"
+  join-message: "&e{player} joined the game"
+  block-chat: true
+  block-pickup: true
+  block-interactions: true
+  block-combat: true

@@ -1,0 +1,32 @@
+name: PlayerInspector
+version: '1.0.1'
+main: dev.playerinspector.PlayerInspectorPlugin
+api-version: '1.21'
+author: PlayerInspector
+description: OP-only player inspection, inventory rollback, shulker/bundle browsing and staff vanish
+commands:
+  playerinspect:
+    description: Inspect, edit, back up and restore player inventories
+    usage: /playerinspect <player> [inventory|ender|shulkers|bundles|death|stats|edit|editender|backup|backups|restore|confirm]
+    aliases: [pinspect, pi]
+    permission: playerinspector.use
+  vanish:
+    description: Toggle staff vanish with a fake leave/join message
+    usage: /vanish [on|off|status]
+    permission: playerinspector.vanish
+permissions:
+  playerinspector.use:
+    description: Inspect other players; plugin also explicitly requires OP status
+    default: op
+  playerinspector.edit:
+    description: Edit live player and ender inventories; plugin also explicitly requires OP
+    default: op
+  playerinspector.restore:
+    description: Replace player inventories from backups; plugin also explicitly requires OP
+    default: op
+  playerinspector.vanish:
+    description: Toggle vanish; plugin also requires OP status
+    default: op
+  playerinspector.vanish.see:
+    description: See vanished staff (operators can always see them)
+    default: op

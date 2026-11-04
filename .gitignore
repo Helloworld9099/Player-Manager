@@ -1,0 +1,44 @@
+# Build outputs and packaged files
+/target/
+**/target/
+*.class
+*.jar
+*.war
+*.zip
+*.tar.gz
+*.log
+
+# Editor and operating-system files
+.idea/
+.vscode/
+.settings/
+.classpath
+.project
+*.iml
+*.swp
+.DS_Store
+Thumbs.db
+
+# Local server and runtime data
+/plugins/
+/server/
+/world/
+/world_nether/
+/world_the_end/
+eula.txt
+server.properties
+
+# Internal tests, generated test artifacts, and temporary API stubs
+/src/test/
+/tests/
+/test/
+**/__tests__/
+**/test-classes/
+**/*Test.java
+**/*Tests.java
+**/stubs/
+**/*Stub.java
+/scripts/*test*
+/scripts/check-abi.py
+/coverage/
+/verification-output/

@@ -1,0 +1,26 @@
+name: Build JAR
+
+on:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+      - name: Package plugin using the official Spigot API
+        run: mvn -B -ntp clean package
+      - uses: actions/upload-artifact@v4
+        with:
+          name: PlayerInspector-1.0.1
+          path: target/PlayerInspector-1.0.1.jar
+          if-no-files-found: error
