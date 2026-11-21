@@ -9,6 +9,7 @@ import net.minecraft.client.model.ModelPartData;
 import net.minecraft.client.model.ModelTransform;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.RenderLayers;
+import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.command.OrderedRenderCommandQueue;
 import net.minecraft.client.render.entity.PlayerEntityRenderer;
 import net.minecraft.client.render.entity.feature.FeatureRenderer;
@@ -23,7 +24,7 @@ import org.joml.Quaternionf;
 /** Purely client-side wings. No entity spawning, no custom equipment items. */
 public final class SeraphWingsClient implements ClientModInitializer {
     @Override public void onInitializeClient() {
-        System.out.println("[Seraph Wings] 1.0.2 initialization");
+        System.out.println("[Seraph Wings] 1.0.3 initialization");
         LivingEntityFeatureRendererRegistrationCallback.EVENT.register((type, renderer, helper, context) -> {
             if (renderer instanceof PlayerEntityRenderer playerRenderer) {
                 helper.register(new WingsRenderer(playerRenderer));
@@ -44,6 +45,7 @@ public final class SeraphWingsClient implements ClientModInitializer {
         private final ModelPart upperGlow = plane(138, 146);
         private final ModelPart lowerGlow = plane(96, 76);
         private final ModelPart halo = plane(32, 32);
+        private final ModelPart haloAura = plane(32, 32);
         private final ModelPart haloGlow = plane(72, 34);
         private static Identifier texture(String name) {
             return Identifier.of("seraphwings", "textures/cosmetic/" + name + ".png");
@@ -80,21 +82,21 @@ public final class SeraphWingsClient implements ClientModInitializer {
             if(divine){
                 for(int side:new int[]{-1,1}){
                     drawWing(m,q,light,angelLayers,angelTextures,angelGlow,
-                        texture("angel/wing_glow"),side,.20f,.08f,.19f,.245f,age,gliding,0f,false);
+                        texture("angel/wing_glow"),texture("angel/wing_aura"),side,.20f,-.57f,.19f,.245f,age,gliding,0f,false);
                 }
-                drawHalo(m,q,halo,texture("angel/halo"),haloGlow,texture("angel/halo_glow"),age);
+                drawHalo(m,q,halo,texture("angel/halo"),haloGlow,texture("angel/halo_glow"),texture("angel/halo_aura"),age);
             }else{
                 for(int side:new int[]{-1,1}){
                     drawWing(m,q,light,upperLayers,upperTextures,upperGlow,
-                        texture("fallen/upper_glow"),side,.22f,.11f,.19f,.235f,age,gliding,0f,false);
+                        texture("fallen/upper_glow"),texture("fallen/upper_aura"),side,.22f,-.54f,.19f,.235f,age,gliding,0f,false);
                     drawWing(m,q,light,lowerLayers,lowerTextures,lowerGlow,
-                        texture("fallen/lower_glow"),side,.24f,.51f,.21f,.225f,age,gliding,8f,true);
+                        texture("fallen/lower_glow"),texture("fallen/lower_aura"),side,.24f,-.14f,.21f,.225f,age,gliding,8f,true);
                 }
-                drawHalo(m,q,halo,texture("fallen/halo"),haloGlow,texture("fallen/halo_glow"),age);
+                drawHalo(m,q,halo,texture("fallen/halo"),haloGlow,texture("fallen/halo_glow"),texture("fallen/halo_aura"),age);
             }
         }
         private void drawWing(MatrixStack m,OrderedRenderCommandQueue q,int light,
-            ModelPart[] layers,Identifier[] textures,ModelPart glow,Identifier glowTex,
+            ModelPart[] layers,Identifier[] textures,ModelPart glow,Identifier glowTex,Identifier auraTex,
             int side,float rootX,float rootY,float rootZ,float size,float age,float glide,float lag,boolean lower) {
             m.push();
             m.translate(side*rootX,rootY,rootZ);
@@ -109,33 +111,55 @@ public final class SeraphWingsClient implements ClientModInitializer {
                 m.push();
                 m.translate(0,0,.17*(layers.length-1-i));
                 RenderLayer render=RenderLayers.entityCutoutNoCull(textures[i]);
-                q.submitModelPart(layers[i],m,render,light,0,null);
+                // No damage/hurt overlay: passing 0 here tinted the white artwork red.
+                int wingLight = glowTex.getPath().contains("/angel/") ? FULL_BRIGHT : light;
+                q.submitModelPart(layers[i],m,render,wingLight,OverlayTexture.DEFAULT_UV,null);
                 m.pop();
             }
+            // Soft aura drawn from an additional blurred glow mask; feather art remains byte-identical.
+            m.push();
+            m.translate(0,0,.17*(layers.length+1));
+            m.scale(1.045f,1.045f,1.0f);
+            int auraAlpha=125+(int)(22*Math.sin(age*.095f));
+            q.submitModelPart(glow,m,RenderLayers.entityTranslucentEmissive(auraTex),
+                FULL_BRIGHT,OverlayTexture.DEFAULT_UV,null,(auraAlpha<<24)|0xFFFFFF,null);
+            m.pop();
+            // Bright feather highlights: this is self-lit in vanilla; shader bloom is optional.
             m.push();
             m.translate(0,0,.17*layers.length);
-            int a=65+(int)(25*Math.sin(age*.095f));
+            int a=205+(int)(30*Math.sin(age*.095f));
             q.submitModelPart(glow,m,RenderLayers.entityTranslucentEmissive(glowTex),
-                FULL_BRIGHT,0,null,(a<<24)|0xFFFFFF,null);
+                FULL_BRIGHT,OverlayTexture.DEFAULT_UV,null,(a<<24)|0xFFFFFF,null);
             m.pop();m.pop();
         }
         private void drawHalo(MatrixStack m,OrderedRenderCommandQueue q,ModelPart ring,
-            Identifier ringTex,ModelPart glow,Identifier glowTex,float age){
+            Identifier ringTex,ModelPart glow,Identifier glowTex,Identifier auraTex,float age){
             double bob=Math.sin(age*.09f)*.025;
             m.push();
-            m.translate(0,-.82-bob,0);
+            m.translate(0,-1.22-bob,0);
             m.multiply(new Quaternionf().rotationY(age*.018f));
             m.multiply(new Quaternionf().rotationX((float)Math.PI/2));
             m.translate(-.33,-.33,0);
             m.scale(.33f,.33f,.33f);
-            q.submitModelPart(ring,m,RenderLayers.entityCutoutNoCull(ringTex),FULL_BRIGHT,0,null);
+            q.submitModelPart(ring,m,RenderLayers.entityCutoutNoCull(ringTex),FULL_BRIGHT,OverlayTexture.DEFAULT_UV,null);
+            m.pop();
+            // Diffuse ring aura centered on the same horizontal halo plane.
+            m.push();
+            m.translate(0,-1.22-bob,0);
+            m.multiply(new Quaternionf().rotationY(age*.018f));
+            m.multiply(new Quaternionf().rotationX((float)Math.PI/2));
+            m.translate(-.36,-.36,.008);
+            m.scale(.36f,.36f,.36f);
+            int haloAuraAlpha=170+(int)(24*Math.sin(age*.09f));
+            q.submitModelPart(haloAura,m,RenderLayers.entityTranslucentEmissive(auraTex),
+                FULL_BRIGHT,OverlayTexture.DEFAULT_UV,null,(haloAuraAlpha<<24)|0xFFFFFF,null);
             m.pop();
             m.push();
-            m.translate(-.38,-.84-bob,.03);
+            m.translate(-.38,-1.24-bob,.03);
             m.scale(.18f,.18f,.18f);
-            int a=85+(int)(30*Math.sin(age*.09f));
+            int a=200+(int)(32*Math.sin(age*.09f));
             q.submitModelPart(glow,m,RenderLayers.entityTranslucentEmissive(glowTex),
-                FULL_BRIGHT,0,null,(a<<24)|0xFFFFFF,null);
+                FULL_BRIGHT,OverlayTexture.DEFAULT_UV,null,(a<<24)|0xFFFFFF,null);
             m.pop();
         }
     }

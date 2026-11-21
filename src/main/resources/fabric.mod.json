@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "seraphwings",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "name": "Seraph Wings",
   "description": "Client-rendered angel and fallen-angel wings and halos",
   "environment": "client",
