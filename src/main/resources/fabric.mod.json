@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "id": "seraphwings",
+  "version": "1.0.2",
+  "name": "Seraph Wings",
+  "description": "Client-rendered angel and fallen-angel wings and halos",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "dev.seraph.wings.SeraphWingsClient"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.20.1",
+    "minecraft": "1.21.11",
+    "java": ">=21",
+    "fabric-api": ">=0.141.0"
+  }
+}

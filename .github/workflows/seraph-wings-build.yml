@@ -1,0 +1,29 @@
+name: Seraph Wings Fabric 1.21.11 Build
+on:
+  push:
+    branches:
+      - build/seraph-wings-fabric-1-21-11-20261121
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.2.1'
+      - name: Build with actual Fabric and Minecraft dependencies
+        run: gradle clean build --no-daemon --stacktrace
+      - name: Upload working remapped JAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: seraph-wings-1.0.2
+          path: build/libs/seraph-wings-1.0.2.jar
+          if-no-files-found: error
