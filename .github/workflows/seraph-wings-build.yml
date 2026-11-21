@@ -18,10 +18,10 @@ jobs:
           java-version: '21'
       - uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: '9.2.1'
-      - name: Build with actual Fabric and Minecraft dependencies
+          gradle-version: '9.8.0'
+      - name: Build with real Fabric and Minecraft dependencies
         run: gradle clean build --no-daemon --stacktrace
-      - name: Upload working remapped JAR
+      - name: Upload remapped JAR
         uses: actions/upload-artifact@v4
         with:
           name: seraph-wings-1.0.2
