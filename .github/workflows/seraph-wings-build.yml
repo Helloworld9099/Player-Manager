@@ -1,8 +1,7 @@
 name: Seraph Wings Fabric 1.21.11 Build
 on:
   push:
-    branches:
-      - build/seraph-wings-fabric-1-21-11-20261121
+    branches: [build/seraph-wings-fabric-1-21-11-20261121]
   workflow_dispatch:
 permissions:
   contents: read
@@ -15,13 +14,13 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '21'
+          java-version: '25'
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '9.8.0'
-      - name: Build with real Fabric and Minecraft dependencies
+      - name: Build real remapped Minecraft 1.21.11 Fabric JAR
         run: gradle clean build --no-daemon --stacktrace
-      - name: Upload remapped JAR
+      - name: Upload built mod JAR
         uses: actions/upload-artifact@v4
         with:
           name: seraph-wings-1.0.2
